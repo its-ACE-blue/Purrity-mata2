@@ -1,0 +1,5 @@
+MathJax 3.2.2
+Copyright 2009–2023 The MathJax Consortium.
+Distributed under the Apache License, Version 2.0.
+Source: https://www.mathjax.org/ and https://registry.npmjs.org/mathjax/3.2.2
+Bundled es5 files are unmodified.
