@@ -1,0 +1,12 @@
+{
+  "name": "purrity-mata",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Bilingual maths study desk; buildless and offline-ready from the extracted folder.",
+  "scripts": {
+    "test": "node tests/run.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}

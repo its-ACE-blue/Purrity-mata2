@@ -1,0 +1,8 @@
+const fs=require('fs'),path=require('path'),assert=require('node:assert/strict');
+const {JSDOM,ResourceLoader,VirtualConsole}=require('jsdom');
+const root=path.resolve(__dirname,'..');const errors=[];
+class LocalAssets extends ResourceLoader{fetch(url){const u=new URL(url);if(u.hostname!=='purrity.example')throw Error('Unexpected external request: '+u.hostname);const file=path.resolve(root,'.'+u.pathname);if(!file.startsWith(root+'/'))throw Error('Invalid path');if(!fs.existsSync(file))throw Error('Missing asset: '+u.pathname);return Promise.resolve(fs.readFileSync(file))}}
+const log=new VirtualConsole();log.on('jsdomError',e=>{if(!/Could not parse CSS/.test(e.message))errors.push(e.message)});
+(async()=>{const dom=new JSDOM(fs.readFileSync(root+'/index.html','utf8'),{url:'https://purrity.example/',resources:new LocalAssets(),runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:log,beforeParse(w){w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{}}});const w=dom.window;await new Promise(resolve=>w.addEventListener('load',resolve));await w.MathJax.startup.promise;
+const paths=w.eval('TOPICS.map(r=>r.path)');for(const p of paths){w.history.replaceState(null,'','#/'+p+'/formulas');w.eval('render()');await w.eval('mathQueue');assert.ok(w.document.querySelector('mjx-container'),'No typesetting: '+p);const bad=[...w.document.querySelectorAll('mjx-merror')];assert.equal(bad.length,0,'Math error: '+p)}
+assert.equal(errors.length,0,errors.join('\n'));console.log('PASS offline resource loading and bundled MathJax on all 26 formula pages');w.eval('clearInterval(clock)');w.close();})().catch(e=>{console.error(e.message);process.exitCode=1});
